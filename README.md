@@ -13,4 +13,4 @@ Submarine	           3
 Cruiser	             3
 Destroyer	           2
 
-try reducing the grid size to 6x6 to reduce game time. 
+try reducing the grid size to 6x6 to reduce game time.
