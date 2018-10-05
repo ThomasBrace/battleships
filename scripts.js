@@ -19,16 +19,15 @@ var game = {
     //setup function to build game grid
     renderGrid: function() {
       for (var p=0;p <= game.players.length-1; p++){
-        var grid = "<div class='content'><div class='row'>";
+        var grid = "<div class='content'>";
         for (var i=0;i <= game.players[p].cells.length-1; i++){
-            if (game.players[p].cells[i].x == game.totalX){
-                grid += "<div class='cell' id=cell_" + game.players[p].type + "_" + game.players[p].cells[i].index +"></div></div><div class='row'>"
-            } else {
-                grid += "<div class='cell' id=cell_" + game.players[p].type + "_" + game.players[p].cells[i].index +"></div>"
-            };
-        };
-        grid = grid.slice(0,grid.lastIndexOf("<div class='row'>")); //remove last unneeded row
-        grid = grid + "<div>";
+          grid += "<div class='row'>";
+          for (var x=0;x <= game.players[p].cells[i].length-1; x++){
+            grid += "<div class='cell' id=cell_" + game.players[p].type + "_" + game.players[p].cells[i][x].index +"></div>";
+          }
+          grid += "</div>";
+        }
+        grid += "</div>";
         document.getElementById("container").innerHTML = document.getElementById("container").innerHTML + grid; //render grid to container
       }
     },
@@ -47,7 +46,7 @@ var game = {
         game.ships.push(new Ship("destroyer", 2));
     },
     positionShips: function() {
-      //Ships mesured from top left
+      //Grid mesured from top left
       //get ship size and determin possible start locations
       var orientation = "";
       var shipY = 1;
@@ -55,22 +54,19 @@ var game = {
 
       if (isHorrizontal()){
         orientation = "X";
-        shipX = game.ships[0].size; //over write deafult with correct length
+        shipX = game.ships[0].size; //overwrite deafult width correct length
       } else {
         orientation = "Y";
-        shipY = game.ships[0].size; //over write deafult with correct length
+        shipY = game.ships[0].size; //overwrite deafult width correct length
       }
 
       var currentPos = this.randomLocation(shipX,shipY);
 
       var tempGrid = this.buildGrid()
 
-      var ShipArrayStartPos = (currentPos[0]+(currentPos[1]*game.totalX)-game.totalX)-1;
-      tempGrid[ShipArrayStartPos].content = game.ships[0].type
-      //mark grid cells with ship
-      for (var i=1;i<=game.ships[0].size ;i++){
+      tempGrid[currentPos[0]][currentPos[1]].content = game.ships[0].type
 
-      }
+      console.log(tempGrid)
 
       /// you got to here
 
@@ -96,20 +92,25 @@ var game = {
       return [xPos,yPos]
     },
     buildGrid(){
+
       //create cell objetcs.
       var currentRow = 1;
-      var cells = [];
-      for (var i=1;i<=(game.totalX*game.totalY);i++) {
+      var cells = [[]];
+      for (var i=1;i<=(game.totalY*game.totalX);i++) {
           var currentCol = i%game.totalX;
           if (currentCol == "0") {
+              cells.push(new Array())
               currentCol = game.totalX;
-              cells.push(new Cell(currentCol,currentRow,i,null));
-              currentRow ++;
+              cells[currentRow-1].push(new Cell(currentCol,currentRow,i,null));
+              currentRow ++; //move to next sub array
           } else {
-              cells.push(new Cell(currentCol,currentRow,i,null));
+              cells[currentRow-1].push(new Cell(currentCol,currentRow,i,null));
           }
       }
-      return cells;
+      cells.splice(-1,1) //remove last random array entry
+      return cells
+
+
     }
 }
 
