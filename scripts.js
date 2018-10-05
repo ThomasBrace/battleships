@@ -23,7 +23,7 @@ var game = {
         for (var i=0;i <= game.players[p].cells.length-1; i++){
           grid += "<div class='row'>";
           for (var x=0;x <= game.players[p].cells[i].length-1; x++){
-            grid += "<div class='cell' id=cell_" + game.players[p].type + "_" + game.players[p].cells[i][x].index +"></div>";
+            grid += "<div class='cell' id=cell_" + game.players[p].type + "_" + game.players[p].cells[i][x].index +">"+game.players[p].cells[i][x].content +"</div>";
           }
           grid += "</div>";
         }
@@ -44,50 +44,68 @@ var game = {
         game.ships.push(new Ship("submarine", 3));
         game.ships.push(new Ship("cruiser", 3));
         game.ships.push(new Ship("destroyer", 2));
-    },
-    positionShips: function() {
-      for (var i=0;i < game.ships.length; i++){
-        game.positionShip(i);
-      }
+
+        for (var i=0;i < game.ships.length; i++){
+          game.positionShip(i);
+        }
+        game.renderGrid();
     },
     positionShip: function(ship) {
-      //Grid mesured from top left
-      //get ship size and determin possible start locations
-      var orientation = "";
-      var shipY = 1;
-      var shipX = 1;
 
-      if (isHorrizontal()){
-        orientation = "X";
-        shipX = game.ships[ship].size; //overwrite deafult width correct length
-      } else {
-        orientation = "Y";
-        shipY = game.ships[ship].size; //overwrite deafult width correct length
-      }
+      while (!this.isLocationValid(shipArray)){
+        //Grid mesured from top left
+        //get ship size and determin possible start locations
+        var orientation = "";
+        var shipY = 1;
+        var shipX = 1;
 
-      var currentPos = this.randomLocation(shipX,shipY);
-
-      var shipArray = [];
-      shipArray.push([currentPos[0],currentPos[1]])
-
-
-      var tempGrid = this.players[0].cells;
-
-      var x = currentPos[0];
-      var y = currentPos[1];
-      tempGrid[x][y].content = game.ships[ship].type; //position front of ship 1 - you need to loop though all the ships and check for clashes
-
-      for (var i=1;i <= game.ships[ship].size; i++){
-        if (orientation === "X"){
-          x ++;
+        if (isHorrizontal()){
+          orientation = "X";
+          shipX = game.ships[ship].size; //overwrite deafult width correct length
         } else {
-          y++;
+          orientation = "Y";
+          shipY = game.ships[ship].size; //overwrite deafult width correct length
         }
-console.log(x+";"+y+":"+orientation+":"+game.ships[ship].type);
-        tempGrid[x][y].content = game.ships[ship].type;
+
+        var currentPos = this.randomLocation(shipX,shipY);
+
+        var shipArray = [];
+
+        var x = currentPos[0];
+        var y = currentPos[1];
+        shipArray.push([currentPos[0],currentPos[1]]) //place nose of ship
+
+        for (var i=2;i <= game.ships[ship].size; i++){ //start from 2 as the nose of ship has already been placed
+          if (orientation === "X"){
+            x ++;
+          } else {
+            y++;
+          }
+          shipArray.push([x,y])
+        }
+
+console.log(game.ships[ship].type+":"+this.isLocationValid(shipArray))
+      }
+      if (this.isLocationValid(shipArray)){
+        this.dropShip(shipArray, this.ships[ship].type )
       }
 
-      this.players[0].cells = tempGrid;
+    },
+    isLocationValid: function(ship) {
+      if(!ship){
+        return false;
+      }
+      for (var i=0;i < ship.length; i++){
+        if (this.players[0].cells[ship[i][0]][ship[i][1]].content){
+          return false;
+        }
+      }
+      return true;
+    },
+    dropShip: function(ship, type){
+      for (var i=0;i < ship.length; i++){
+        this.players[0].cells[ship[i][0]][ship[i][1]].content = type;
+      }
     },
     randomLocation(shipX,shipY){
       //return a random location with in the currnet gird, if height and width are passed in retun a location the ship will fit into
@@ -150,5 +168,3 @@ function isHorrizontal(){
 
 game.buildPlayers();
 game.buildShips();
-game.renderGrid();
-game.positionShips();
