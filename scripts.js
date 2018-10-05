@@ -46,6 +46,11 @@ var game = {
         game.ships.push(new Ship("destroyer", 2));
     },
     positionShips: function() {
+      for (var i=0;i < game.ships.length; i++){
+        game.positionShip(i);
+      }
+    },
+    positionShip: function(ship) {
       //Grid mesured from top left
       //get ship size and determin possible start locations
       var orientation = "";
@@ -54,27 +59,35 @@ var game = {
 
       if (isHorrizontal()){
         orientation = "X";
-        shipX = game.ships[0].size; //overwrite deafult width correct length
+        shipX = game.ships[ship].size; //overwrite deafult width correct length
       } else {
         orientation = "Y";
-        shipY = game.ships[0].size; //overwrite deafult width correct length
+        shipY = game.ships[ship].size; //overwrite deafult width correct length
       }
 
       var currentPos = this.randomLocation(shipX,shipY);
 
-      var tempGrid = this.buildGrid()
-
-      tempGrid[currentPos[0]][currentPos[1]].content = game.ships[0].type
-
-      console.log(tempGrid)
-
-      /// you got to here
+      var shipArray = [];
+      shipArray.push([currentPos[0],currentPos[1]])
 
 
+      var tempGrid = this.players[0].cells;
 
+      var x = currentPos[0];
+      var y = currentPos[1];
+      tempGrid[x][y].content = game.ships[ship].type; //position front of ship 1 - you need to loop though all the ships and check for clashes
 
+      for (var i=1;i <= game.ships[ship].size; i++){
+        if (orientation === "X"){
+          x ++;
+        } else {
+          y++;
+        }
+console.log(x+";"+y+":"+orientation+":"+game.ships[ship].type);
+        tempGrid[x][y].content = game.ships[ship].type;
+      }
 
-
+      this.players[0].cells = tempGrid;
     },
     randomLocation(shipX,shipY){
       //return a random location with in the currnet gird, if height and width are passed in retun a location the ship will fit into
@@ -86,8 +99,8 @@ var game = {
       if (shipY > 0){
         height = height - shipY;
       }
-      var xPos = Math.floor(Math.random() * width) + 1;
-      var yPos = Math.floor(Math.random() * height) + 1;
+      var xPos = Math.floor(Math.random() * width);
+      var yPos = Math.floor(Math.random() * height);
 
       return [xPos,yPos]
     },
